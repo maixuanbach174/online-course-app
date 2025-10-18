@@ -56,6 +56,22 @@ func (u *User) UpdateProfile(profile string) error {
 	return nil
 }
 
+// Getters (read-only access for serialization/display)
+func (u *User) ID() string       { return u.id }
+func (u *User) Username() string { return u.username }
+func (u *User) Email() string    { return u.email }
+func (u *User) Role() Role       { return u.role }
+func (u *User) Profile() string  { return u.profile }
+
+// Behavior methods
 func (u *User) HasRole(role Role) bool {
 	return u.role == role
+}
+
+func (u *User) CanTeach() bool {
+	return u.role == RoleTeacher || u.role == RoleAdmin
+}
+
+func (u *User) CanEnroll() bool {
+	return u.role == RoleStudent
 }

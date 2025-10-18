@@ -18,7 +18,7 @@ type Role struct {
 	r string
 }
 
-func (r Role) NewRoleFromString(roleStr string) (Role, error) {
+func NewRoleFromString(roleStr string) (Role, error) {
 	for _, role := range roleValues {
 		if role.String() == roleStr {
 			return role, nil
