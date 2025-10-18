@@ -4,6 +4,7 @@ import "github.com/pkg/errors"
 
 type Course struct {
 	id          string
+	teacherID   string
 	title       string
 	description string
 	thumbnail   string
@@ -17,6 +18,7 @@ type Course struct {
 
 func NewCourse(
 	id string,
+	teacherID string,
 	title string,
 	description string,
 	thumbnail string,
@@ -28,13 +30,23 @@ func NewCourse(
 	modules []Module,
 ) (*Course, error) {
 
-	// a new course must have at least one module
+	// Validate required fields
+	if id == "" {
+		return nil, errors.New("course id is required")
+	}
+	if teacherID == "" {
+		return nil, errors.New("teacher id is required")
+	}
+	if title == "" {
+		return nil, errors.New("course title is required")
+	}
 	if len(modules) == 0 {
 		return nil, errors.New("a course must have at least one module")
 	}
 
 	return &Course{
 		id:          id,
+		teacherID:   teacherID,
 		title:       title,
 		description: description,
 		thumbnail:   thumbnail,
@@ -50,6 +62,7 @@ func NewCourse(
 
 // Getters (read-only access for serialization/display)
 func (c *Course) ID() string          { return c.id }
+func (c *Course) TeacherID() string   { return c.teacherID }
 func (c *Course) Title() string       { return c.title }
 func (c *Course) Description() string { return c.description }
 func (c *Course) Thumbnail() string   { return c.thumbnail }
@@ -117,6 +130,10 @@ func (c *Course) CalculateTotalDuration() int {
 }
 
 // Additional behavior methods
+func (c *Course) IsOwnedBy(teacherID string) bool {
+	return c.teacherID == teacherID
+}
+
 func (c *Course) HasTag(tag Tag) bool {
 	for _, t := range c.tags {
 		if t.String() == tag.String() {

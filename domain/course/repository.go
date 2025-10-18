@@ -8,4 +8,5 @@ type CourseRepository interface {
 	Delete(ctx context.Context, id string) error
 	Get(ctx context.Context, id string) (*Course, error)
 	GetAll(ctx context.Context) ([]*Course, error)
+	GetAllByTeacherID(ctx context.Context, teacherID string) ([]*Course, error)
 }
