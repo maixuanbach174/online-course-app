@@ -1,4 +1,4 @@
-module github.com/maixuanbach174/online-course-app/internal/core
+module github.com/maixuanbach174/online-course-app/internal/education
 
 go 1.25.2
 

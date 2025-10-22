@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/maixuanbach174/online-course-app/internal/core/app/command"
-	"github.com/maixuanbach174/online-course-app/internal/core/app/query"
+	"github.com/maixuanbach174/online-course-app/internal/education/app/command"
+	"github.com/maixuanbach174/online-course-app/internal/education/app/query"
 )
 
 type Application struct {

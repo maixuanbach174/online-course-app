@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/maixuanbach174/online-course-app/internal/common/decorator"
-	"github.com/maixuanbach174/online-course-app/internal/core/domain/enrollment"
+	"github.com/maixuanbach174/online-course-app/internal/education/domain/enrollment"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
