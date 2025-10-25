@@ -5,6 +5,7 @@ import (
 )
 
 func TestNewCourse(t *testing.T) {
+	t.Parallel()
 	t.Run("successfully creates course with valid data", func(t *testing.T) {
 		course, err := NewCourse(
 			"course-123",
@@ -156,6 +157,7 @@ func TestNewCourse(t *testing.T) {
 }
 
 func TestCourse_IsOwnedBy(t *testing.T) {
+	t.Parallel()
 	course, _ := NewCourse(
 		"course-123",
 		"teacher-456",
@@ -183,6 +185,7 @@ func TestCourse_IsOwnedBy(t *testing.T) {
 }
 
 func TestCourse_HasTag(t *testing.T) {
+	t.Parallel()
 	course, _ := NewCourse(
 		"course-123",
 		"teacher-456",
@@ -213,6 +216,7 @@ func TestCourse_HasTag(t *testing.T) {
 }
 
 func TestCourse_UpdateBasicInfo(t *testing.T) {
+	t.Parallel()
 	course, _ := NewCourse(
 		"course-123",
 		"teacher-456",
@@ -278,6 +282,7 @@ func TestCourse_UpdateBasicInfo(t *testing.T) {
 }
 
 func TestCourse_UpdateDuration(t *testing.T) {
+	t.Parallel()
 	course, _ := NewCourse(
 		"course-123",
 		"teacher-456",
@@ -330,6 +335,7 @@ func TestCourse_UpdateDuration(t *testing.T) {
 }
 
 func TestCourse_UpdateRating(t *testing.T) {
+	t.Parallel()
 	course, _ := NewCourse(
 		"course-123",
 		"teacher-456",
@@ -408,6 +414,7 @@ func TestCourse_UpdateRating(t *testing.T) {
 }
 
 func TestCourse_AddTag(t *testing.T) {
+	t.Parallel()
 	course, _ := NewCourse(
 		"course-123",
 		"teacher-456",
@@ -464,6 +471,7 @@ func TestCourse_AddTag(t *testing.T) {
 }
 
 func TestCourse_RemoveTag(t *testing.T) {
+	t.Parallel()
 	course, _ := NewCourse(
 		"course-123",
 		"teacher-456",

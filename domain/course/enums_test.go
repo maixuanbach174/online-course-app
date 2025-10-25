@@ -5,6 +5,7 @@ import (
 )
 
 func TestCourseLevel_String(t *testing.T) {
+	t.Parallel()
 	t.Run("Beginner level returns correct string", func(t *testing.T) {
 		if Beginner.String() != "beginner" {
 			t.Errorf("expected 'beginner', got '%s'", Beginner.String())
@@ -25,6 +26,7 @@ func TestCourseLevel_String(t *testing.T) {
 }
 
 func TestNewCourseLevelFromString(t *testing.T) {
+	t.Parallel()
 	t.Run("successfully creates Beginner from string", func(t *testing.T) {
 		level, err := NewCourseLevelFromString("beginner")
 
@@ -91,6 +93,7 @@ func TestNewCourseLevelFromString(t *testing.T) {
 }
 
 func TestDomain_String(t *testing.T) {
+	t.Parallel()
 	domains := []struct {
 		domain   Domain
 		expected string
@@ -117,6 +120,7 @@ func TestDomain_String(t *testing.T) {
 }
 
 func TestNewDomainFromString(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		input    string
 		expected string
@@ -179,6 +183,7 @@ func TestNewDomainFromString(t *testing.T) {
 }
 
 func TestTag_String(t *testing.T) {
+	t.Parallel()
 	tags := []struct {
 		tag      Tag
 		expected string
@@ -214,6 +219,7 @@ func TestTag_String(t *testing.T) {
 }
 
 func TestNewTagFromString(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		input    string
 		expected string

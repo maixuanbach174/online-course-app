@@ -5,6 +5,7 @@ import (
 )
 
 func TestNewModule(t *testing.T) {
+	t.Parallel()
 	t.Run("successfully creates module with valid data", func(t *testing.T) {
 		module, err := NewModule(
 			"module-123",
@@ -124,6 +125,7 @@ func TestNewModule(t *testing.T) {
 }
 
 func TestModule_UpdateOrder(t *testing.T) {
+	t.Parallel()
 	module, _ := NewModule(
 		"module-123",
 		"course-456",
@@ -180,6 +182,7 @@ func TestModule_UpdateOrder(t *testing.T) {
 }
 
 func TestModule_UpdateTitle(t *testing.T) {
+	t.Parallel()
 	module, _ := NewModule(
 		"module-123",
 		"course-456",
@@ -237,6 +240,7 @@ func TestModule_UpdateTitle(t *testing.T) {
 }
 
 func TestModule_Getters(t *testing.T) {
+	t.Parallel()
 	module, _ := NewModule(
 		"module-123",
 		"course-456",

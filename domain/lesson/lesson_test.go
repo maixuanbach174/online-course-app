@@ -5,6 +5,7 @@ import (
 )
 
 func TestNewLesson(t *testing.T) {
+	t.Parallel()
 	t.Run("successfully creates lesson with all fields", func(t *testing.T) {
 		lesson, err := NewLesson(
 			"lesson-123",
@@ -149,6 +150,7 @@ func TestNewLesson(t *testing.T) {
 }
 
 func TestLesson_HasVideo(t *testing.T) {
+	t.Parallel()
 	t.Run("returns true when video exists", func(t *testing.T) {
 		lesson, _ := NewLesson(
 			"lesson-123",
@@ -185,6 +187,7 @@ func TestLesson_HasVideo(t *testing.T) {
 }
 
 func TestLesson_UpdateContent(t *testing.T) {
+	t.Parallel()
 	lesson, _ := NewLesson(
 		"lesson-123",
 		"module-456",
@@ -232,6 +235,7 @@ func TestLesson_UpdateContent(t *testing.T) {
 }
 
 func TestLesson_UpdateOverview(t *testing.T) {
+	t.Parallel()
 	lesson, _ := NewLesson(
 		"lesson-123",
 		"module-456",
@@ -267,6 +271,7 @@ func TestLesson_UpdateOverview(t *testing.T) {
 }
 
 func TestLesson_UpdateVideoID(t *testing.T) {
+	t.Parallel()
 	lesson, _ := NewLesson(
 		"lesson-123",
 		"module-456",
@@ -308,6 +313,7 @@ func TestLesson_UpdateVideoID(t *testing.T) {
 }
 
 func TestLesson_UpdateDuration(t *testing.T) {
+	t.Parallel()
 	lesson, _ := NewLesson(
 		"lesson-123",
 		"module-456",
@@ -358,6 +364,7 @@ func TestLesson_UpdateDuration(t *testing.T) {
 }
 
 func TestLesson_UpdateOrder(t *testing.T) {
+	t.Parallel()
 	lesson, _ := NewLesson(
 		"lesson-123",
 		"module-456",
@@ -408,6 +415,7 @@ func TestLesson_UpdateOrder(t *testing.T) {
 }
 
 func TestLesson_UpdateTitle(t *testing.T) {
+	t.Parallel()
 	lesson, _ := NewLesson(
 		"lesson-123",
 		"module-456",
@@ -447,6 +455,7 @@ func TestLesson_UpdateTitle(t *testing.T) {
 }
 
 func TestLesson_Getters(t *testing.T) {
+	t.Parallel()
 	lesson, _ := NewLesson(
 		"lesson-123",
 		"module-456",

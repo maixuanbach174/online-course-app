@@ -3,6 +3,8 @@ package postgresql
 import (
 	"context"
 
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/maixuanbach174/online-course-app/internal/education/adapters/postgresql/database"
@@ -165,7 +167,7 @@ func (r *CourseRepository) createCourse(ctx context.Context, q *database.Queries
 	thumbnail := pgtype.Text{String: c.Thumbnail(), Valid: c.Thumbnail() != ""}
 
 	var rating pgtype.Numeric
-	if err := rating.Scan(c.Rating()); err != nil {
+	if err := rating.Scan(fmt.Sprintf("%.2f", c.Rating())); err != nil {
 		return errors.Wrap(err, "failed to convert rating")
 	}
 
@@ -193,7 +195,7 @@ func (r *CourseRepository) updateCourse(ctx context.Context, q *database.Queries
 	thumbnail := pgtype.Text{String: c.Thumbnail(), Valid: c.Thumbnail() != ""}
 
 	var rating pgtype.Numeric
-	if err := rating.Scan(c.Rating()); err != nil {
+	if err := rating.Scan(fmt.Sprintf("%.2f", c.Rating())); err != nil {
 		return errors.Wrap(err, "failed to convert rating")
 	}
 
