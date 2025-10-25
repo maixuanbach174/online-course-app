@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS courses (
     title VARCHAR(500) NOT NULL,
     description TEXT,
     thumbnail TEXT,
-    duration INT NOT NULL DEFAULT 0,
+    duration INT NOT NULL DEFAULT 0 CHECK (duration >= 0),
     domain VARCHAR(100) NOT NULL,
-    rating DECIMAL(3, 2) DEFAULT 0.0,
+    rating DECIMAL(3, 2) DEFAULT 0.0 CHECK (rating >= 0 AND rating <= 5),
     level VARCHAR(50) NOT NULL CHECK (level IN ('beginner', 'intermediate', 'advanced')),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -47,10 +47,11 @@ CREATE TABLE IF NOT EXISTS modules (
     id VARCHAR(255) PRIMARY KEY,
     course_id VARCHAR(255) NOT NULL,
     title VARCHAR(500) NOT NULL,
-    order_index INT NOT NULL,
+    order_index INT NOT NULL CHECK (order_index >= 0),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+    UNIQUE (course_id, order_index)
 );
 
 CREATE INDEX idx_modules_course_id ON modules(course_id);
@@ -64,10 +65,12 @@ CREATE TABLE IF NOT EXISTS lessons (
     overview TEXT,
     content TEXT,
     video_id VARCHAR(255),
-    order_index INT NOT NULL,
+    duration INT NOT NULL DEFAULT 0 CHECK (duration >= 0),
+    order_index INT NOT NULL CHECK (order_index >= 0),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
+    FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE,
+    UNIQUE (module_id, order_index)
 );
 
 CREATE INDEX idx_lessons_module_id ON lessons(module_id);
@@ -80,13 +83,15 @@ CREATE TABLE IF NOT EXISTS exercises (
     question TEXT NOT NULL,
     answers TEXT[] NOT NULL,
     correct_answer TEXT NOT NULL,
-    order_index INT NOT NULL,
+    order_index INT NOT NULL CHECK (order_index >= 0),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+    UNIQUE (lesson_id, order_index)
 );
 
 CREATE INDEX idx_exercises_lesson_id ON exercises(lesson_id);
+CREATE INDEX idx_exercises_order ON exercises(lesson_id, order_index);
 
 -- Enrollments table
 CREATE TABLE IF NOT EXISTS enrollments (

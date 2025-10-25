@@ -1,4 +1,4 @@
-package query
+package course_query
 
 import (
 	"context"

@@ -58,6 +58,7 @@ type Lesson struct {
 	Overview   pgtype.Text      `json:"overview"`
 	Content    pgtype.Text      `json:"content"`
 	VideoID    pgtype.Text      `json:"video_id"`
+	Duration   int32            `json:"duration"`
 	OrderIndex int32            `json:"order_index"`
 	CreatedAt  pgtype.Timestamp `json:"created_at"`
 	UpdatedAt  pgtype.Timestamp `json:"updated_at"`

@@ -11,7 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const courseExists = `-- name: CourseExists :one
+SELECT EXISTS(SELECT 1 FROM courses WHERE id = $1)
+`
+
+func (q *Queries) CourseExists(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRow(ctx, courseExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createCourse = `-- name: CreateCourse :exec
+
 INSERT INTO courses (id, teacher_id, title, description, thumbnail, duration, domain, rating, level, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
 `
@@ -28,6 +40,7 @@ type CreateCourseParams struct {
 	Level       string         `json:"level"`
 }
 
+// Course queries
 func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) error {
 	_, err := q.db.Exec(ctx, createCourse,
 		arg.ID,
@@ -44,8 +57,10 @@ func (q *Queries) CreateCourse(ctx context.Context, arg CreateCourseParams) erro
 }
 
 const createCourseTag = `-- name: CreateCourseTag :exec
+
 INSERT INTO course_tags (course_id, tag)
 VALUES ($1, $2)
+ON CONFLICT (course_id, tag) DO NOTHING
 `
 
 type CreateCourseTagParams struct {
@@ -53,84 +68,18 @@ type CreateCourseTagParams struct {
 	Tag      string `json:"tag"`
 }
 
+// Course Tags queries
 func (q *Queries) CreateCourseTag(ctx context.Context, arg CreateCourseTagParams) error {
 	_, err := q.db.Exec(ctx, createCourseTag, arg.CourseID, arg.Tag)
 	return err
 }
 
-const createExercise = `-- name: CreateExercise :exec
-INSERT INTO exercises (id, lesson_id, question, answers, correct_answer, order_index, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+const deleteAllCourseTags = `-- name: DeleteAllCourseTags :exec
+DELETE FROM course_tags WHERE course_id = $1
 `
 
-type CreateExerciseParams struct {
-	ID            string   `json:"id"`
-	LessonID      string   `json:"lesson_id"`
-	Question      string   `json:"question"`
-	Answers       []string `json:"answers"`
-	CorrectAnswer string   `json:"correct_answer"`
-	OrderIndex    int32    `json:"order_index"`
-}
-
-func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) error {
-	_, err := q.db.Exec(ctx, createExercise,
-		arg.ID,
-		arg.LessonID,
-		arg.Question,
-		arg.Answers,
-		arg.CorrectAnswer,
-		arg.OrderIndex,
-	)
-	return err
-}
-
-const createLesson = `-- name: CreateLesson :exec
-INSERT INTO lessons (id, module_id, title, overview, content, video_id, order_index, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-`
-
-type CreateLessonParams struct {
-	ID         string      `json:"id"`
-	ModuleID   string      `json:"module_id"`
-	Title      string      `json:"title"`
-	Overview   pgtype.Text `json:"overview"`
-	Content    pgtype.Text `json:"content"`
-	VideoID    pgtype.Text `json:"video_id"`
-	OrderIndex int32       `json:"order_index"`
-}
-
-func (q *Queries) CreateLesson(ctx context.Context, arg CreateLessonParams) error {
-	_, err := q.db.Exec(ctx, createLesson,
-		arg.ID,
-		arg.ModuleID,
-		arg.Title,
-		arg.Overview,
-		arg.Content,
-		arg.VideoID,
-		arg.OrderIndex,
-	)
-	return err
-}
-
-const createModule = `-- name: CreateModule :exec
-INSERT INTO modules (id, course_id, title, order_index, created_at, updated_at)
-VALUES ($1, $2, $3, $4, NOW(), NOW())
-`
-
-type CreateModuleParams struct {
-	ID         string `json:"id"`
-	CourseID   string `json:"course_id"`
-	Title      string `json:"title"`
-	OrderIndex int32  `json:"order_index"`
-}
-
-func (q *Queries) CreateModule(ctx context.Context, arg CreateModuleParams) error {
-	_, err := q.db.Exec(ctx, createModule,
-		arg.ID,
-		arg.CourseID,
-		arg.Title,
-		arg.OrderIndex,
-	)
+func (q *Queries) DeleteAllCourseTags(ctx context.Context, courseID string) error {
+	_, err := q.db.Exec(ctx, deleteAllCourseTags, courseID)
 	return err
 }
 
@@ -143,21 +92,17 @@ func (q *Queries) DeleteCourse(ctx context.Context, id string) error {
 	return err
 }
 
-const deleteCourseTags = `-- name: DeleteCourseTags :exec
-DELETE FROM course_tags WHERE course_id = $1
+const deleteCourseTag = `-- name: DeleteCourseTag :exec
+DELETE FROM course_tags WHERE course_id = $1 AND tag = $2
 `
 
-func (q *Queries) DeleteCourseTags(ctx context.Context, courseID string) error {
-	_, err := q.db.Exec(ctx, deleteCourseTags, courseID)
-	return err
+type DeleteCourseTagParams struct {
+	CourseID string `json:"course_id"`
+	Tag      string `json:"tag"`
 }
 
-const deleteModulesByCourseID = `-- name: DeleteModulesByCourseID :exec
-DELETE FROM modules WHERE course_id = $1
-`
-
-func (q *Queries) DeleteModulesByCourseID(ctx context.Context, courseID string) error {
-	_, err := q.db.Exec(ctx, deleteModulesByCourseID, courseID)
+func (q *Queries) DeleteCourseTag(ctx context.Context, arg DeleteCourseTagParams) error {
+	_, err := q.db.Exec(ctx, deleteCourseTag, arg.CourseID, arg.Tag)
 	return err
 }
 
@@ -277,113 +222,6 @@ func (q *Queries) GetCoursesByTeacherID(ctx context.Context, teacherID string) (
 			&i.Domain,
 			&i.Rating,
 			&i.Level,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getExercisesByLessonID = `-- name: GetExercisesByLessonID :many
-SELECT id, lesson_id, question, answers, correct_answer, order_index, created_at, updated_at
-FROM exercises
-WHERE lesson_id = $1
-ORDER BY order_index ASC
-`
-
-func (q *Queries) GetExercisesByLessonID(ctx context.Context, lessonID string) ([]Exercise, error) {
-	rows, err := q.db.Query(ctx, getExercisesByLessonID, lessonID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Exercise{}
-	for rows.Next() {
-		var i Exercise
-		if err := rows.Scan(
-			&i.ID,
-			&i.LessonID,
-			&i.Question,
-			&i.Answers,
-			&i.CorrectAnswer,
-			&i.OrderIndex,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getLessonsByModuleID = `-- name: GetLessonsByModuleID :many
-SELECT id, module_id, title, overview, content, video_id, order_index, created_at, updated_at
-FROM lessons
-WHERE module_id = $1
-ORDER BY order_index ASC
-`
-
-func (q *Queries) GetLessonsByModuleID(ctx context.Context, moduleID string) ([]Lesson, error) {
-	rows, err := q.db.Query(ctx, getLessonsByModuleID, moduleID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Lesson{}
-	for rows.Next() {
-		var i Lesson
-		if err := rows.Scan(
-			&i.ID,
-			&i.ModuleID,
-			&i.Title,
-			&i.Overview,
-			&i.Content,
-			&i.VideoID,
-			&i.OrderIndex,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getModulesByCourseID = `-- name: GetModulesByCourseID :many
-SELECT id, course_id, title, order_index, created_at, updated_at
-FROM modules
-WHERE course_id = $1
-ORDER BY order_index ASC
-`
-
-func (q *Queries) GetModulesByCourseID(ctx context.Context, courseID string) ([]Module, error) {
-	rows, err := q.db.Query(ctx, getModulesByCourseID, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Module{}
-	for rows.Next() {
-		var i Module
-		if err := rows.Scan(
-			&i.ID,
-			&i.CourseID,
-			&i.Title,
-			&i.OrderIndex,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
