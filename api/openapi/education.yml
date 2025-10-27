@@ -1,0 +1,435 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Education API
+  description: API for the education system
+  contact:
+    name: Mai Xuan Bach
+    url: https://github.com/maixuanbach174
+servers:
+  - url: http://{hostname}/api
+    variables:
+      hostname:
+        default: localhost
+paths:
+  /courses:
+    get:
+      summary: Get all courses
+      description: Retrieve a list of all courses with optional filtering
+      operationId: getCourses
+      tags:
+        - courses
+      parameters:
+        - name: domain
+          in: query
+          description: Filter by course domain
+          required: false
+          schema:
+            $ref: '#/components/schemas/CourseDomain'
+        - name: level
+          in: query
+          description: Filter by course level
+          required: false
+          schema:
+            $ref: '#/components/schemas/CourseLevel'
+        - name: tag
+          in: query
+          description: Filter by course tag
+          required: false
+          schema:
+            $ref: '#/components/schemas/CourseTag'
+      responses:
+        '200':
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid filter parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Create a new course
+      description: Create a new course (teacher only)
+      operationId: createCourse
+      tags:
+        - courses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseRequest'
+      responses:
+        '201':
+          description: Course created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /courses/{courseId}:
+    get:
+      summary: Get course details
+      description: Retrieve detailed information about a specific course
+      operationId: getCourseById
+      tags:
+        - courses
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          description: The unique identifier of the course
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Course details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update a course
+      description: Update an existing course (teacher only)
+      operationId: updateCourse
+      tags:
+        - courses
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          description: The unique identifier of the course
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCourseRequest'
+      responses:
+        '200':
+          description: Course updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete a course
+      description: Delete a course and all its associated content (teacher only)
+      operationId: deleteCourse
+      tags:
+        - courses
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          description: The unique identifier of the course
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Course deleted successfully
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /teachers/{teacherId}/courses:
+    get:
+      summary: Get courses by teacher
+      description: Retrieve all courses created by a specific teacher
+      operationId: getCoursesByTeacher
+      tags:
+        - courses
+        - teachers
+      parameters:
+        - name: teacherId
+          in: path
+          required: true
+          description: The unique identifier of the teacher
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of courses by teacher
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '404':
+          description: Teacher not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Course:
+      type: object
+      required:
+        - id
+        - teacherId
+        - title
+        - duration
+        - domain
+        - level
+        - rating
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the course
+          example: "course-123"
+        teacherId:
+          type: string
+          description: Unique identifier of the teacher who created the course
+          example: "teacher-456"
+        title:
+          type: string
+          description: Title of the course
+          example: "Introduction to Go Programming"
+        description:
+          type: string
+          description: Detailed description of the course
+          example: "Learn the fundamentals of Go programming language"
+        thumbnail:
+          type: string
+          description: URL to the course thumbnail image
+          example: "https://example.com/thumbnails/go-course.jpg"
+        duration:
+          type: integer
+          description: Duration of the course in minutes
+          example: 600
+          minimum: 0
+        domain:
+          $ref: '#/components/schemas/CourseDomain'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseTag'
+          description: List of tags associated with the course
+        rating:
+          type: number
+          format: float
+          description: Average rating of the course
+          example: 4.5
+          minimum: 0
+          maximum: 5
+        level:
+          $ref: '#/components/schemas/CourseLevel'
+
+    CreateCourseRequest:
+      type: object
+      required:
+        - teacherId
+        - title
+        - duration
+        - domain
+        - level
+      properties:
+        teacherId:
+          type: string
+          description: Unique identifier of the teacher creating the course
+          example: "teacher-456"
+        title:
+          type: string
+          description: Title of the course
+          example: "Introduction to Go Programming"
+        description:
+          type: string
+          description: Detailed description of the course
+          example: "Learn the fundamentals of Go programming language"
+        thumbnail:
+          type: string
+          description: URL to the course thumbnail image
+          example: "https://example.com/thumbnails/go-course.jpg"
+        duration:
+          type: integer
+          description: Duration of the course in minutes
+          example: 600
+          minimum: 0
+        domain:
+          $ref: '#/components/schemas/CourseDomain'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseTag'
+          description: List of tags associated with the course
+        rating:
+          type: number
+          format: float
+          description: Initial rating of the course
+          example: 0.0
+          minimum: 0
+          maximum: 5
+        level:
+          $ref: '#/components/schemas/CourseLevel'
+
+    UpdateCourseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the course
+          example: "Advanced Go Programming"
+        description:
+          type: string
+          description: Detailed description of the course
+          example: "Master advanced concepts in Go programming"
+        thumbnail:
+          type: string
+          description: URL to the course thumbnail image
+          example: "https://example.com/thumbnails/go-advanced.jpg"
+        duration:
+          type: integer
+          description: Duration of the course in minutes
+          example: 900
+          minimum: 0
+        domain:
+          $ref: '#/components/schemas/CourseDomain'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourseTag'
+          description: List of tags associated with the course
+        rating:
+          type: number
+          format: float
+          description: Updated rating of the course
+          example: 4.7
+          minimum: 0
+          maximum: 5
+        level:
+          $ref: '#/components/schemas/CourseLevel'
+
+    CourseDomain:
+      type: string
+      enum:
+        - programming
+        - design
+        - business
+        - marketing
+        - data_science
+        - personal_development
+        - photography
+        - music
+        - health_fitness
+        - language
+      description: Domain/category of the course
+
+    CourseLevel:
+      type: string
+      enum:
+        - beginner
+        - intermediate
+        - advanced
+      description: Difficulty level of the course
+
+    CourseTag:
+      type: string
+      enum:
+        - backend
+        - frontend
+        - fullstack
+        - mobile
+        - devops
+        - database
+        - security
+        - testing
+        - api
+        - cloud
+        - ai
+        - machine_learning
+        - web_development
+        - game_development
+        - beginner_friendly
+        - advanced
+        - certified
+        - free
+        - paid
+      description: Tags for categorizing and filtering courses
+
+    Error:
+      type: object
+      required:
+        - slug
+        - message
+      properties:
+        slug:
+          type: string
+        message:
+          type: string
