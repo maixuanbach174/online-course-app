@@ -87,11 +87,11 @@ func newConnectionPool(ctx context.Context, config *Config) (*pgxpool.Pool, erro
 	}
 
 	// Configure connection pool settings for better resource management
-	poolConfig.MaxConns = 25         // Maximum number of connections
-	poolConfig.MinConns = 5          // Minimum number of connections to keep open
-	poolConfig.MaxConnLifetime = 0   // Connections live forever (unless explicitly closed)
-	poolConfig.MaxConnIdleTime = 0   // Keep idle connections
-	poolConfig.HealthCheckPeriod = 0 // Disable health checks (can be enabled if needed)
+	poolConfig.MaxConns = 25       // Maximum number of connections
+	poolConfig.MinConns = 5        // Minimum number of connections to keep open
+	poolConfig.MaxConnLifetime = 0 // Connections live forever (unless explicitly closed)
+	poolConfig.MaxConnIdleTime = 0 // Keep idle connections
+	// Don't set HealthCheckPeriod to 0 as it causes panic - use default or set a positive duration
 
 	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {

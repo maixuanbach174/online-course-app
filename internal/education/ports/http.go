@@ -8,6 +8,7 @@ import (
 	"github.com/maixuanbach174/online-course-app/internal/education/app"
 	"github.com/maixuanbach174/online-course-app/internal/education/app/command/course_command"
 	"github.com/maixuanbach174/online-course-app/internal/education/app/query/course_query"
+	"github.com/maixuanbach174/online-course-app/internal/education/domain/course"
 )
 
 type HttpServer struct {
@@ -45,7 +46,14 @@ func (h HttpServer) GetCourses(w http.ResponseWriter, r *http.Request, params Ge
 		httperr.RespondWithSlugError(err, w, r)
 		return
 	}
-	render.Respond(w, r, courses)
+
+	// Map domain courses to API response
+	var response []Course
+	for _, c := range courses {
+		response = append(response, mapCourseToResponse(c))
+	}
+
+	render.Respond(w, r, response)
 }
 
 func (h HttpServer) CreateCourse(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +109,7 @@ func (h HttpServer) DeleteCourse(w http.ResponseWriter, r *http.Request, courseI
 }
 
 func (h HttpServer) GetCourseById(w http.ResponseWriter, r *http.Request, courseId string) {
-	course, err := h.app.Queries.GetCourseDetails.Handle(r.Context(), course_query.GetCourseDetails{
+	c, err := h.app.Queries.GetCourseDetails.Handle(r.Context(), course_query.GetCourseDetails{
 		CourseID: courseId,
 	})
 
@@ -110,7 +118,8 @@ func (h HttpServer) GetCourseById(w http.ResponseWriter, r *http.Request, course
 		return
 	}
 
-	render.Respond(w, r, course)
+	response := mapCourseToResponse(c)
+	render.Respond(w, r, response)
 }
 
 func (h HttpServer) UpdateCourse(w http.ResponseWriter, r *http.Request, courseId string) {
@@ -177,7 +186,37 @@ func (h HttpServer) GetCoursesByTeacher(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	render.Respond(w, r, courses)
+	// Map domain courses to API response
+	var response []Course
+	for _, c := range courses {
+		response = append(response, mapCourseToResponse(c))
+	}
+
+	render.Respond(w, r, response)
+}
+
+// Helper function to map domain Course to API Course response
+func mapCourseToResponse(c *course.Course) Course {
+	description := c.Description()
+	thumbnail := c.Thumbnail()
+
+	var tags []CourseTag
+	for _, tag := range c.Tags() {
+		tags = append(tags, CourseTag(tag.String()))
+	}
+
+	return Course{
+		Id:          c.ID(),
+		TeacherId:   c.TeacherID(),
+		Title:       c.Title(),
+		Description: &description,
+		Thumbnail:   &thumbnail,
+		Duration:    c.Duration(),
+		Domain:      CourseDomain(c.Domain().String()),
+		Level:       CourseLevel(c.Level().String()),
+		Rating:      float32(c.Rating()),
+		Tags:        &tags,
+	}
 }
 
 // Helper function to safely get string value from pointer
